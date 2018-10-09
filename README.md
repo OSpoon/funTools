@@ -1,5 +1,7 @@
 # funTools
 
+[![Travis](https://img.shields.io/badge/%E5%9C%B0%E5%9D%80-FIR-green.svg)](https://fir.im/lw12)
+
 电投辅助工具是一款解决光速保手机版使用过成功出现文件丢失版本信息等功能
 
 电投辅助工具是一款解决光速保手机版使用过成功出现文件丢失版本信息等功能
