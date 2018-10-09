@@ -1,0 +1,95 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.menutest.MainActivity">
+
+    <item
+        android:id="@+id/menu_consultation"
+        android:title="咨询"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_clear_www"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="1.清除资源文件" />
+
+    <item
+        android:id="@+id/menu_init_www"
+        android:orderInCategory="200"
+        android:showAsAction="never"
+        android:title="2.初始化资源版本" />
+
+    <item
+        android:id="@+id/menu_fast_install"
+        android:orderInCategory="300"
+        android:showAsAction="never"
+        android:title="3.快速安装" />
+
+    <item
+        android:id="@+id/menu_check_version"
+        android:orderInCategory="400"
+        android:showAsAction="never"
+        android:title="4.获取服务器版本" />
+
+    <item
+        android:id="@+id/menu_get_www_version"
+        android:orderInCategory="500"
+        android:showAsAction="never"
+        android:title="5.获取本地资源版本" />
+
+    <item
+        android:id="@+id/menu_un_zip_file"
+        android:orderInCategory="600"
+        android:showAsAction="never"
+        android:title="6.解压资源文件" />
+
+    <item
+        android:id="@+id/menu_create_nomedia"
+        android:orderInCategory="700"
+        android:showAsAction="never"
+        android:title="7.隐藏资源图片" />
+
+    <item
+        android:id="@+id/menu_get_files"
+        android:orderInCategory="800"
+        android:showAsAction="never"
+        android:title="8.资源数量统计" />
+
+    <item
+        android:id="@+id/menu_get_version_address"
+        android:orderInCategory="1000"
+        android:showAsAction="never"
+        android:title="9.获取下载地址" />
+
+    <item
+        android:id="@+id/menu_gonggao"
+        android:orderInCategory="1100"
+        android:showAsAction="never"
+        android:title="公告" />
+
+    <item
+        android:id="@+id/menu_helper"
+        android:orderInCategory="1200"
+        android:showAsAction="never"
+        android:title="帮助" />
+
+    <item
+        android:id="@+id/menu_ping"
+        android:orderInCategory="1300"
+        android:showAsAction="never"
+        android:title="PING" />
+
+    <item
+        android:id="@+id/menu_test_date"
+        android:orderInCategory="1400"
+        android:showAsAction="never"
+        android:title="DATA" />
+
+    <item
+        android:id="@+id/menu_reward"
+        android:orderInCategory="1500"
+        android:showAsAction="never"
+        android:title="打赏" />
+
+</menu>

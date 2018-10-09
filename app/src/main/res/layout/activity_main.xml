@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp"
+    tools:context="n22.online.funtools.MainActivity">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_hint_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="请认真阅读以下提示:\n1.按钮全部移至顶部3小点菜单中\n2.本工具仅为处理特殊场景使用,请勿随意使用~\n3.使用前如有疑问请点上面的咨询按钮\n\n*请选择执行环境 :"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14dp" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_sit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="SIT环境" />
+
+        <RadioButton
+            android:id="@+id/rb_uat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="UAT环境" />
+
+        <RadioButton
+            android:id="@+id/rb_sc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SC环境" />
+
+    </RadioGroup>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_hint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        android:layout_weight="1"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical"
+        android:textColor="@android:color/holo_red_light" />
+
+</LinearLayout>
