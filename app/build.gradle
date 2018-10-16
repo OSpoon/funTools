@@ -29,4 +29,6 @@ dependencies {
     compile 'com.github.didikee:AndroidDonate:0.1.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26.0.0-alpha1'
+    compile 'cn.yipianfengye.android:zxing-library:2.2'
+    compile 'com.google.code.gson:gson:2.8.5'
 }

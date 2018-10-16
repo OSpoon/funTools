@@ -4,7 +4,12 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.didikee.donate.AlipayDonate;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -29,6 +34,9 @@ import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
+import com.google.gson.Gson;
+import com.uuzuche.lib_zxing.activity.CaptureActivity;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -49,7 +57,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import cn.com.epsoft.keyboard.PayKeyboardFragment;
 import cn.com.epsoft.keyboard.widget.PayKeyboardView;
 import n22.online.funtools.bean.PingNetEntity;
+import n22.online.funtools.bean.VersionBean;
 import n22.online.funtools.utils.DialogHelp;
+import n22.online.funtools.utils.ImageUtil;
 import n22.online.funtools.utils.PingNet;
 import n22.online.funtools.utils.ZipUtil;
 import okhttp3.Call;
@@ -90,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         rb_sit = (RadioButton) findViewById(R.id.rb_sit);
         rb_uat = (RadioButton) findViewById(R.id.rb_uat);
         rb_sc = (RadioButton) findViewById(R.id.rb_sc);
@@ -101,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         tv_hint.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                if(!TextUtils.isEmpty(tv_hint.getText())){
+                if (!TextUtils.isEmpty(tv_hint.getText())) {
                     ClipboardManager cmb = (ClipboardManager) MainActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
                     cmb.setText(tv_hint.getText().toString().trim()); //将内容放入粘贴管理器,在别的地方长按选择"粘贴"即可
                     ToastUtils.showShort("复制文本成功");
@@ -133,13 +142,17 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 }
             }
         };
+        checkHelperVersion();
     }
 
     private static final int INIT_PERM = 0x200;
 
+    private static final int REQUEST_CODE = 0x400;
+    private static final int REQUEST_IMAGE = 0x500;
+
     @AfterPermissionGranted(INIT_PERM)
     private void checkPermission() {
-        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
         if (EasyPermissions.hasPermissions(this, perms)) {
 
         } else {
@@ -329,6 +342,42 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     public void onResponse(String json, int i) {
                         dialog.dismiss();
                         tv_hint.setText(json);
+                    }
+                });
+    }
+
+    private void checkHelperVersion() {
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("请稍等...");
+        dialog.show();
+        OkHttpUtils.get().url("http://api.fir.im/apps/latest/5ba2f209959d69290b2969b8?api_token=0ac334a22e69c2345a5cec8e1674fff9").build()
+                .execute(new StringCallback() {
+                    @Override
+                    public void onError(Call call, Exception e, int i) {
+                        dialog.dismiss();
+                    }
+
+                    @Override
+                    public void onResponse(String json, int i) {
+                        dialog.dismiss();
+                        final VersionBean version = new Gson().fromJson(json, VersionBean.class);
+                        try {
+                            PackageInfo packageInfo = MainActivity.this.getApplicationContext()
+                                    .getPackageManager()
+                                    .getPackageInfo(MainActivity.this.getPackageName(), 0);
+                            if (!packageInfo.versionName.equals(version.getVersionShort())) {
+                                DialogHelp.getConfirmDialog(MainActivity.this, version.getChangelog().replaceAll("\n", "<br>"), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Uri uri = Uri.parse(version.getInstall_url());
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                        startActivity(intent);
+                                    }
+                                }).show();
+                            }
+                        } catch (PackageManager.NameNotFoundException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
     }
@@ -619,14 +668,14 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             case R.id.menu_gonggao:
                 WebViewActivity.startWebPage(this, "http://n22.online/doc/readme.txt");
                 break;
-            case R.id.menu_test_date:
-                if (dialogFrag == null) {
-                    dialogFrag = new PayKeyboardFragment();
-                    dialogFrag.setTitle("请输入提取数据密码");
-                    dialogFrag.setOnKeyboardListener(MainActivity.this);
-                }
-                dialogFrag.show(getFragmentManager(), "payKeyboardDialog");
-                break;
+//            case R.id.menu_test_date:
+//                if (dialogFrag == null) {
+//                    dialogFrag = new PayKeyboardFragment();
+//                    dialogFrag.setTitle("请输入提取数据密码");
+//                    dialogFrag.setOnKeyboardListener(MainActivity.this);
+//                }
+//                dialogFrag.show(getFragmentManager(), "payKeyboardDialog");
+//                break;
             case R.id.menu_helper:
                 String data = "<h5>各个菜单项简要说明:</h5>" +
                         "<p>1.清除资源文件:清除SD卡存放的资源文件,需光速保重新下载恢复;光速保打开后出现丢失文件可尝试此操作</p>" +
@@ -647,11 +696,22 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     }
                 }).show();
                 break;
+            case R.id.menu_zxing_1:
+                Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
+                startActivityForResult(intent, REQUEST_CODE);
+                break;
+            case R.id.menu_zxing_2:
+                intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                startActivityForResult(intent, REQUEST_IMAGE);
+                break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void onComplete(String one, String two, String three, String four, String five, String six) {
@@ -669,6 +729,52 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onBack() {
         if (dialogFrag != null) {
             dialogFrag.dismiss();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /**
+         * 处理二维码扫描结果
+         */
+        if (requestCode == REQUEST_CODE) {
+            //处理扫描结果（在界面上显示）
+            if (data != null) {
+                Bundle bundle = data.getExtras();
+                if (bundle == null) {
+                    return;
+                }
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    String result = bundle.getString(CodeUtils.RESULT_STRING);
+                    tv_hint.setText(Html.fromHtml("<a href=\"" + result + "\">" + result + "</a><br>点击跳转浏览器查看/下载"));
+                    tv_hint.setAutoLinkMask(Linkify.ALL);
+                    tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                    tv_hint.setText("解析二维码失败,请重新识别");
+                }
+            }
+        } else if (requestCode == REQUEST_IMAGE) {
+            if (data != null) {
+                Uri uri = data.getData();
+                try {
+                    CodeUtils.analyzeBitmap(ImageUtil.getImageAbsolutePath(this, uri), new CodeUtils.AnalyzeCallback() {
+                        @Override
+                        public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
+                            tv_hint.setText(Html.fromHtml("<a href=\"" + result + "\">" + result + "</a><br>点击跳转浏览器查看/下载"));
+                            tv_hint.setAutoLinkMask(Linkify.ALL);
+                            tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
+                        }
+
+                        @Override
+                        public void onAnalyzeFailed() {
+                            tv_hint.setText("解析二维码失败,请重新识别");
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

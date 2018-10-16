@@ -81,10 +81,16 @@
         android:title="PING" />
 
     <item
-        android:id="@+id/menu_test_date"
-        android:orderInCategory="1400"
+        android:id="@+id/menu_zxing_1"
+        android:orderInCategory="1310"
         android:showAsAction="never"
-        android:title="DATA" />
+        android:title="二维码-扫一扫" />
+
+    <item
+        android:id="@+id/menu_zxing_2"
+        android:orderInCategory="1320"
+        android:showAsAction="never"
+        android:title="二维码-相册选" />
 
     <item
         android:id="@+id/menu_reward"
