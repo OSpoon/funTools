@@ -36,6 +36,9 @@
 
         <activity
             android:name=".WebViewActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".AppListActivity"
             android:parentActivityName=".MainActivity"></activity>
     </application>
 

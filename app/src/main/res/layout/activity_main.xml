@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:text="请认真阅读以下提示:\n1.按钮全部移至顶部3小点菜单中\n2.本工具仅为处理特殊场景使用,请勿随意使用~\n3.使用前如有疑问请点上面的咨询按钮\n\n*请选择执行环境 :"
+        android:text="请认真阅读以下提示:\n1.按钮全部移至顶部3小点菜单中\n2.本工具仅为处理特殊场景使用,请勿随意使用~\n3.使用前如有疑问请点上面的咨询按钮\n4.新版选项需配合新版光速保使用(新版发布时间为定)\n\n*请选择执行环境 :"
         android:textColor="@android:color/holo_red_dark"
         android:textSize="14dp" />
 
@@ -38,11 +38,49 @@
             android:text="UAT环境" />
 
         <RadioButton
+            android:id="@+id/rb_ysc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="YSC环境" />
+
+        <RadioButton
             android:id="@+id/rb_sc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="SC环境" />
+
+    </RadioGroup>
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_hint_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="*请选择执行版本 :\n(选择新版后相册中出现的资源文件不在禁止删除,但需配合新版光速保使用,新版光速保发布时间未定)"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="14dp" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_old"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="旧版" />
+
+        <RadioButton
+            android:id="@+id/rb_new"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="新版" />
 
     </RadioGroup>
 

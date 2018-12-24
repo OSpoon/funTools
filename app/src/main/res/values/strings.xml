@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">电投辅助工具</string>
+    <string name="title_activity_app_list">应用列表</string>
 </resources>

@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.FileUtils;
+import com.blankj.utilcode.util.PhoneUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
 import com.google.gson.Gson;
@@ -48,12 +49,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import cn.addapp.pickers.picker.NumberPicker;
 import cn.com.epsoft.keyboard.PayKeyboardFragment;
 import cn.com.epsoft.keyboard.widget.PayKeyboardView;
 import n22.online.funtools.bean.PingNetEntity;
@@ -88,7 +91,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     RadioButton rb_sit;
     RadioButton rb_uat;
+    RadioButton rb_ysc;
     RadioButton rb_sc;
+
+    RadioButton rb_old;
+    RadioButton rb_new;
+
     AppCompatTextView tv_hint;
     AppCompatTextView tv_hint_1;
     ProgressDialog dialog;
@@ -102,7 +110,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         setContentView(R.layout.activity_main);
         rb_sit = (RadioButton) findViewById(R.id.rb_sit);
         rb_uat = (RadioButton) findViewById(R.id.rb_uat);
+        rb_ysc = (RadioButton) findViewById(R.id.rb_ysc);
         rb_sc = (RadioButton) findViewById(R.id.rb_sc);
+
+        rb_old = (RadioButton) findViewById(R.id.rb_old);
+        rb_new = (RadioButton) findViewById(R.id.rb_new);
+
         tv_hint_1 = (AppCompatTextView) findViewById(R.id.tv_hint_1);
 //        tv_hint_1.setTypeface(Typeface.createFromAsset(getAssets(),"fonts/STXINWEI.TTF"));
         tv_hint = (AppCompatTextView) findViewById(R.id.tv_hint);
@@ -143,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             }
         };
         checkHelperVersion();
+        ToastUtils.showLong(PhoneUtils.getIMEI());
+
     }
 
     private static final int INIT_PERM = 0x200;
@@ -152,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @AfterPermissionGranted(INIT_PERM)
     private void checkPermission() {
-        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_PHONE_STATE};
         if (EasyPermissions.hasPermissions(this, perms)) {
 
         } else {
@@ -225,15 +240,28 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             base_app_name = "gsb_beta_mobile";
             base_url = "http://mitphone.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
             down_url = "http://mitphone.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
+        } else if (rb_ysc.isChecked()) {
+            base_name = "gsb_mobile_ysc_data";
+            base_app_name = "gsb_ysc_mobile";
+            base_url = "http://180.213.5.47:8010/com.ifp.ipartner/moUpgrade";
+            down_url = "http://180.213.5.47:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
         } else if (rb_sc.isChecked()) {
             base_name = "gsb_mobile_sc_data";
             base_app_name = "gsb_sc_mobile";
             base_url = "http://mit.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
             down_url = "http://mit.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
         }
-        basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name;
-        rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/www/index.html";
-        configPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/config.xml";
+        if(rb_old.isChecked()){
+            basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name;
+            rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/www/index.html";
+            configPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/config.xml";
+            sdPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
+        }else if(rb_new.isChecked()){
+            basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name;
+            rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name + "/www/index.html";
+            configPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name + "/config.xml";
+            sdPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/";
+        }
         downFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + ".zip";
     }
 
@@ -571,6 +599,59 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     /**
+     * 修改资源文件版本号
+     */
+    private void modifyVersion() {
+        init_www();
+        boolean isHave = FileUtils.isFileExists(configPath);
+        if (isHave) {
+            String versionStr = FileUtils.readFile2String(configPath, "UTF-8");
+            String str1 = "<productVersion>";
+            String str2 = "</productVersion>";
+            double versionDouble = Double.valueOf(versionStr.split(str1)[1].split(str2)[0]);
+            onNumberPicker(versionDouble);
+        } else {
+            ToastUtils.showShort("资源文件版本文件不存在");
+        }
+    }
+
+    public void onNumberPicker(final double number) {
+        NumberPicker picker = new NumberPicker(this);
+        picker.setCanLoop(false);
+        picker.setLineVisible(false);
+        picker.setWheelModeEnable(true);
+        picker.setOffset(1);//偏移量
+        picker.setRange(1.0, 99.9, 0.1);//数字范围
+        picker.setSelectedItem(number);
+        picker.setLabel(" version");
+        picker.setOnNumberPickListener(new NumberPicker.OnNumberPickListener() {
+            @Override
+            public void onNumberPicked(int index, Number item) {
+                DecimalFormat df = new DecimalFormat("#.0");
+                final String version = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
+                        "<config>\n" +
+                        "\t <!-- 产品及资源文件版本 -->\n" +
+                        "\t<productVersion>" + df.format(item.doubleValue()) + "</productVersion>\n" +
+                        "</config>\n";
+                DialogHelp.getConfirmDialog(MainActivity.this, "当前资源文件版本: " + number + ", 修改后版本号: " + df.format(item.doubleValue()) + ", 请确认修改!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        boolean writeFileFromString = FileUtils.writeFileFromString(configPath, version, false);
+                        if (writeFileFromString) {
+                            String versionStr = FileUtils.readFile2String(configPath, "UTF-8");
+                            String str1 = "<productVersion>";
+                            String str2 = "</productVersion>";
+                            double versionDouble = Double.valueOf(versionStr.split(str1)[1].split(str2)[0]);
+                            ToastUtils.showShort("资源文件最新版本 : " + versionDouble);
+                        }
+                    }
+                }).show();
+            }
+        });
+        picker.show();
+    }
+
+    /**
      * 支付宝支付
      *
      * @param payCode 收款码后面的字符串；例如：收款二维码里面的字符串为 https://qr.alipay.com/stx00187oxldjvyo3ofaw60 ，则
@@ -705,6 +786,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
                 startActivityForResult(intent, REQUEST_IMAGE);
+                break;
+            case R.id.menu_app_list:
+                AppListActivity.startPage(this);
+                break;
+            case R.id.menu_modify_version:
+                modifyVersion();
                 break;
             default:
                 break;

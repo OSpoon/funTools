@@ -63,6 +63,12 @@
         android:title="9.获取下载地址" />
 
     <item
+        android:id="@+id/menu_modify_version"
+        android:orderInCategory="1001"
+        android:showAsAction="never"
+        android:title="10.快速修改资源版本" />
+
+    <item
         android:id="@+id/menu_gonggao"
         android:orderInCategory="1100"
         android:showAsAction="never"
@@ -91,6 +97,12 @@
         android:orderInCategory="1320"
         android:showAsAction="never"
         android:title="二维码-相册选" />
+
+    <item
+        android:id="@+id/menu_app_list"
+        android:orderInCategory="1330"
+        android:showAsAction="never"
+        android:title="应用列表" />
 
     <item
         android:id="@+id/menu_reward"
