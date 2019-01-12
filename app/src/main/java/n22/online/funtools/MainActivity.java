@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
@@ -61,6 +62,7 @@ import cn.com.epsoft.keyboard.PayKeyboardFragment;
 import cn.com.epsoft.keyboard.widget.PayKeyboardView;
 import n22.online.funtools.bean.PingNetEntity;
 import n22.online.funtools.bean.VersionBean;
+import n22.online.funtools.service.QHBAccessibilityService;
 import n22.online.funtools.utils.DialogHelp;
 import n22.online.funtools.utils.ImageUtil;
 import n22.online.funtools.utils.PingNet;
@@ -71,7 +73,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, PayKeyboardView.OnKeyboardListener {
-
+    public static final String TAG = "MainActivity";
     /* 检测更新地址 */
     public String base_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
     public String down_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
@@ -793,6 +795,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             case R.id.menu_modify_version:
                 modifyVersion();
                 break;
+            case R.id.menu_ancillary_services:
+                openService();
+                break;
             default:
                 break;
         }
@@ -863,5 +868,57 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 }
             }
         }
+    }
+
+    private void openService(){
+        if (!isAccessibilitySettingsOn(MainActivity.this, QHBAccessibilityService.class.getCanonicalName())) {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(MainActivity.this, QHBAccessibilityService.class);
+            startService(intent);
+        }
+    }
+
+    /**
+     * 检测辅助功能是否开启
+     *
+     * @param mContext
+     * @return boolean
+     */
+    private boolean isAccessibilitySettingsOn(Context mContext, String serviceName) {
+        int accessibilityEnabled = 0;
+        // 对应的服务
+        final String service = getPackageName() + "/" + serviceName;
+        //Log.i(TAG, "service:" + service);
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(mContext.getApplicationContext().getContentResolver(),
+                    android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
+            Log.v(TAG, "accessibilityEnabled = " + accessibilityEnabled);
+        } catch (Settings.SettingNotFoundException e) {
+            Log.e(TAG, "Error finding setting, default accessibility to not found: " + e.getMessage());
+        }
+        TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+
+        if (accessibilityEnabled == 1) {
+            Log.v(TAG, "***ACCESSIBILITY IS ENABLED*** -----------------");
+            String settingValue = Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(),
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (settingValue != null) {
+                mStringColonSplitter.setString(settingValue);
+                while (mStringColonSplitter.hasNext()) {
+                    String accessibilityService = mStringColonSplitter.next();
+
+                    Log.v(TAG, "-------------- > accessibilityService :: " + accessibilityService + " " + service);
+                    if (accessibilityService.equalsIgnoreCase(service)) {
+                        Log.v(TAG, "We've found the correct setting - accessibility is switched on!");
+                        return true;
+                    }
+                }
+            }
+        } else {
+            Log.v(TAG, "***ACCESSIBILITY IS DISABLED***");
+        }
+        return false;
     }
 }

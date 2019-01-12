@@ -105,6 +105,12 @@
         android:title="应用列表" />
 
     <item
+        android:id="@+id/menu_ancillary_services"
+        android:orderInCategory="1500"
+        android:showAsAction="never"
+        android:title="辅助服务" />
+
+    <item
         android:id="@+id/menu_reward"
         android:orderInCategory="1500"
         android:showAsAction="never"
