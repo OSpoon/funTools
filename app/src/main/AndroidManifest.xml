@@ -16,11 +16,22 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
+                <category android:name="android.intent.category.BROWSABLE"></category>
+                <data android:scheme="gsb"
+                    android:host="dt.help.com"
+                    android:path="/open"></data>
             </intent-filter>
         </activity>
 
@@ -53,6 +64,17 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/redpacket_accessibility_config" />
         </service>
+
+        <receiver
+            android:name=".broadcast.DialBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SECRET_CODE"/>
+                <data android:host="000" android:scheme="android_secret_code"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
