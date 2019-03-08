@@ -8,17 +8,24 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.ClipboardManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.util.Linkify;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
 
@@ -29,6 +36,7 @@ import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     AppCompatTextView tv_hint_1;
 
     private RecyclerView mRecyclerView;
+    private DrawerLayout mDrawerLayout;
 
     private List<MenuBean> menuList;
 
@@ -100,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     private void initView() {
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_menu_list);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
         BaseQuickAdapter appListAdapter = new MenuLiatAdapter(R.layout.menu_item_layout, menuList);
@@ -130,6 +139,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 return true;
             }
         });
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //下面的代码主要通过actionbardrawertoggle将toolbar与drawablelayout关联起来
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
     }
 
     private static final int INIT_PERM = 0x200;
@@ -330,6 +349,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             case "17":
                 FunTools.donateAlipay(this, "FKX03352RMPYBVZMGAFN5F");
                 break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }
