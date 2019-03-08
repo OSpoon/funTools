@@ -58,8 +58,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import cn.addapp.pickers.picker.NumberPicker;
-import cn.com.epsoft.keyboard.PayKeyboardFragment;
-import cn.com.epsoft.keyboard.widget.PayKeyboardView;
 import n22.online.funtools.bean.PingNetEntity;
 import n22.online.funtools.bean.VersionBean;
 import n22.online.funtools.service.QHBAccessibilityService;
@@ -72,7 +70,7 @@ import okhttp3.OkHttpClient;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, PayKeyboardView.OnKeyboardListener {
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
     public static final String TAG = "MainActivity";
     /* 检测更新地址 */
     public String base_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
@@ -103,8 +101,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     AppCompatTextView tv_hint_1;
     ProgressDialog dialog;
     Handler handler;
-
-    PayKeyboardFragment dialogFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             }
         };
         checkHelperVersion();
-        ToastUtils.showLong(PhoneUtils.getIMEI());
+//        ToastUtils.showLong(PhoneUtils.getIMEI());
 
     }
 
@@ -802,26 +798,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    @Override
-    public void onComplete(String one, String two, String three, String four, String five, String six) {
-        if ("7".equals(one) && "9".equals(two) && "5".equals(three) && "1".equals(four) && "3".equals(five) && "5".equals(six)) {
-            Toast.makeText(getBaseContext(), "验证通过", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getBaseContext(), "验证失败", Toast.LENGTH_LONG).show();
-        }
-        if (dialogFrag != null) {
-            dialogFrag.dismiss();
-        }
-    }
-
-    @Override
-    public void onBack() {
-        if (dialogFrag != null) {
-            dialogFrag.dismiss();
-        }
     }
 
     @Override
