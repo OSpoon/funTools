@@ -1,21 +1,18 @@
 package n22.online.funtools;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
+import android.support.annotation.StringRes;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -25,14 +22,18 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.text.util.Linkify;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.uuzuche.lib_zxing.activity.CaptureActivity;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
+import com.yanzhenjie.permission.Action;
+import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.runtime.Permission;
+import com.yzq.zxinglibrary.android.CaptureActivity;
+import com.yzq.zxinglibrary.bean.ZxingConfig;
+import com.yzq.zxinglibrary.common.Constant;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -46,12 +47,12 @@ import n22.online.funtools.bean.MenuBean;
 import n22.online.funtools.utils.DialogHelp;
 import n22.online.funtools.utils.EventBusUtils;
 import n22.online.funtools.utils.FunTools;
-import n22.online.funtools.utils.ImageUtil;
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
+import n22.online.funtools.utils.RuntimeRationale;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, BaseQuickAdapter.OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.OnItemClickListener {
+
     public static final String TAG = "MainActivity";
+    private int REQUEST_CODE_SCAN = 111;
 
     RadioButton rb_sit;
     RadioButton rb_uat;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     private List<MenuBean> menuList;
 
+    private static final int REQUEST_CODE_SETTING = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +79,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         setContentView(R.layout.activity_main);
         initData();
         initView();
-        checkPermission();
+
+        requestPermission(Permission.Group.STORAGE);
+
         FunTools.checkHelperVersion(this);
     }
 
@@ -101,10 +106,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         menuList.add(new MenuBean("11", "公告"));
         menuList.add(new MenuBean("12", "帮助"));
         menuList.add(new MenuBean("13", "PING"));
-        menuList.add(new MenuBean("14", "二维码-扫一扫"));
-        menuList.add(new MenuBean("15", "二维码-相册选"));
-        menuList.add(new MenuBean("16", "应用列表"));
-        menuList.add(new MenuBean("17", "打赏"));
+        menuList.add(new MenuBean("14", "扫一扫"));
+        menuList.add(new MenuBean("15", "应用列表"));
+        menuList.add(new MenuBean("16", "打赏"));
     }
 
     private void initView() {
@@ -151,96 +155,16 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         toggle.syncState();
     }
 
-    private static final int INIT_PERM = 0x200;
-    private static final int REQUEST_CODE = 0x400;
-    private static final int REQUEST_IMAGE = 0x500;
-
-    @AfterPermissionGranted(INIT_PERM)
-    private void checkPermission() {
-        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.READ_PHONE_STATE};
-        if (EasyPermissions.hasPermissions(this, perms)) {
-
-        } else {
-            EasyPermissions.requestPermissions(this, "请求获取文件读写权限",
-                    INIT_PERM, perms);
-        }
-    }
-
-    @Override
-    public void onPermissionsGranted(int requestCode, List<String> perms) {
-        ToastUtils.showShort("权限申请通过");
-    }
-
-    @Override
-    public void onPermissionsDenied(int requestCode, List<String> perms) {
-        ToastUtils.showShort("申请权限被拒");
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(2000);
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            MainActivity.this.finish();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // EasyPermissions handles the request result.
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /**
-         * 处理二维码扫描结果
-         */
-        if (requestCode == REQUEST_CODE) {
-            //处理扫描结果（在界面上显示）
+        // 扫描二维码/条码回传
+        if (requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK) {
             if (data != null) {
-                Bundle bundle = data.getExtras();
-                if (bundle == null) {
-                    return;
-                }
-                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
-                    String result = bundle.getString(CodeUtils.RESULT_STRING);
-                    tv_hint.setText(Html.fromHtml("<a href=\"" + result + "\">" + result + "</a><br>点击跳转浏览器查看/下载"));
-                    tv_hint.setAutoLinkMask(Linkify.ALL);
-                    tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
-                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
-                    tv_hint.setText("解析二维码失败,请重新识别");
-                }
-            }
-        } else if (requestCode == REQUEST_IMAGE) {
-            if (data != null) {
-                Uri uri = data.getData();
-                try {
-                    CodeUtils.analyzeBitmap(ImageUtil.getImageAbsolutePath(this, uri), new CodeUtils.AnalyzeCallback() {
-                        @Override
-                        public void onAnalyzeSuccess(Bitmap mBitmap, String result) {
-                            tv_hint.setText(Html.fromHtml("<a href=\"" + result + "\">" + result + "</a><br>点击跳转浏览器查看/下载"));
-                            tv_hint.setAutoLinkMask(Linkify.ALL);
-                            tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
-                        }
-
-                        @Override
-                        public void onAnalyzeFailed() {
-                            tv_hint.setText("解析二维码失败,请重新识别");
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                String content = data.getStringExtra(Constant.CODED_CONTENT);
+                tv_hint.setText(Html.fromHtml("<a href=\"" + content + "\">" + content + "</a><br>点击跳转浏览器查看/下载"));
+                tv_hint.setAutoLinkMask(Linkify.ALL);
+                tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
             }
         }
     }
@@ -261,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @Override
     public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         int v1 = 0, v2 = 0;
         if (rb_sit.isChecked()) {
             v1 = 1;
@@ -334,19 +259,34 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 FunTools.ping(this);
                 break;
             case "14":
-                Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
-                startActivityForResult(intent, REQUEST_CODE);
+                AndPermission.with(this).runtime()
+                        .permission(Permission.CAMERA, Permission.READ_EXTERNAL_STORAGE)
+                        .rationale(new RuntimeRationale())
+                        .onGranted(new Action<List<String>>() {
+                            @Override
+                            public void onAction(List<String> permissions) {
+                                Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
+                                ZxingConfig config = new ZxingConfig();
+                                config.setDecodeBarCode(false);//是否扫描条形码 默认为true
+                                intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
+                                startActivityForResult(intent, REQUEST_CODE_SCAN);
+                            }
+                        })
+                        .onDenied(new Action<List<String>>() {
+                            @Override
+                            public void onAction(@NonNull List<String> permissions) {
+                                toast(R.string.failure);
+                                if (AndPermission.hasAlwaysDeniedPermission(MainActivity.this, permissions)) {
+                                    showSettingDialog(MainActivity.this, permissions);
+                                }
+                            }
+                        })
+                        .start();
                 break;
             case "15":
-                intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("image/*");
-                startActivityForResult(intent, REQUEST_IMAGE);
-                break;
-            case "16":
                 AppListActivity.startPage(this);
                 break;
-            case "17":
+            case "16":
                 FunTools.donateAlipay(this, "FKX03352RMPYBVZMGAFN5F");
                 break;
         }
@@ -359,5 +299,67 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         } else {
             super.onBackPressed();
         }
+    }
+
+    /**
+     * Request permissions.
+     */
+    private void requestPermission(String... permissions) {
+        AndPermission.with(this)
+                .runtime()
+                .permission(permissions)
+                .rationale(new RuntimeRationale())
+                .onGranted(new Action<List<String>>() {
+                    @Override
+                    public void onAction(List<String> permissions) {
+                        toast(R.string.successfully);
+                    }
+                })
+                .onDenied(new Action<List<String>>() {
+                    @Override
+                    public void onAction(@NonNull List<String> permissions) {
+                        toast(R.string.failure);
+                        if (AndPermission.hasAlwaysDeniedPermission(MainActivity.this, permissions)) {
+                            showSettingDialog(MainActivity.this, permissions);
+                        }
+                    }
+                })
+                .start();
+    }
+
+    protected void toast(@StringRes int message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Display setting dialog.
+     */
+    public void showSettingDialog(Context context, final List<String> permissions) {
+        List<String> permissionNames = Permission.transformText(context, permissions);
+        String message = context.getString(R.string.message_permission_always_failed,
+                TextUtils.join("\n", permissionNames));
+
+        new AlertDialog.Builder(context).setCancelable(false)
+                .setTitle(R.string.title_dialog)
+                .setMessage(message)
+                .setPositiveButton(R.string.setting, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setPermission();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * Set permissions.
+     */
+    private void setPermission() {
+        AndPermission.with(this).runtime().setting().start(REQUEST_CODE_SETTING);
     }
 }

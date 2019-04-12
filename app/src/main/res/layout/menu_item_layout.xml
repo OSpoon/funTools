@@ -14,7 +14,6 @@
         android:gravity="left|center"
         android:paddingLeft="20dp"
         android:textSize="16sp"
-        android:text="111111111"
         android:textStyle="bold" />
 
 </LinearLayout>

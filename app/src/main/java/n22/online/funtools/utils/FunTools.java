@@ -157,11 +157,9 @@ public class FunTools {
                     public void run() {
                         if (ZipUtil.unZip(downFilePath, sdPath)) {
                             dialog.dismiss();
-                            ToastUtils.showShort("解压成功");
                             EventBusUtils.post(new EventMessage(100,"资源文件解压成功"));
                         } else {
                             dialog.dismiss();
-                            ToastUtils.showShort("解压失败");
                             EventBusUtils.post(new EventMessage(100,"资源文件解压失败"));
                         }
                     }
