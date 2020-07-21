@@ -46,6 +46,7 @@ import n22.online.funtools.bean.EventMessage;
 import n22.online.funtools.bean.MenuBean;
 import n22.online.funtools.utils.DialogHelp;
 import n22.online.funtools.utils.EventBusUtils;
+import n22.online.funtools.utils.FormatJson;
 import n22.online.funtools.utils.FunTools;
 import n22.online.funtools.utils.RuntimeRationale;
 
@@ -54,12 +55,9 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
     public static final String TAG = "MainActivity";
     private int REQUEST_CODE_SCAN = 111;
 
-    RadioButton rb_sit;
     RadioButton rb_uat;
-    RadioButton rb_ysc;
     RadioButton rb_sc;
 
-    RadioButton rb_old;
     RadioButton rb_new;
 
     AppCompatTextView tv_hint;
@@ -121,12 +119,9 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
         appListAdapter.setOnItemClickListener(this);
         mRecyclerView.setAdapter(appListAdapter);
 
-        rb_sit = (RadioButton) findViewById(R.id.rb_sit);
         rb_uat = (RadioButton) findViewById(R.id.rb_uat);
-        rb_ysc = (RadioButton) findViewById(R.id.rb_ysc);
         rb_sc = (RadioButton) findViewById(R.id.rb_sc);
 
-        rb_old = (RadioButton) findViewById(R.id.rb_old);
         rb_new = (RadioButton) findViewById(R.id.rb_new);
 
         tv_hint_1 = (AppCompatTextView) findViewById(R.id.tv_hint_1);
@@ -176,7 +171,11 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveEvent(EventMessage event) {
-        tv_hint.setText(event.getData().toString());
+        if(event.getCode() == 201){
+            tv_hint.setText(Html.fromHtml(event.getData().toString()));
+        }else{
+            tv_hint.setText(FormatJson.format(event.getData().toString()));
+        }
         if (event.getCode() == 200) {
             tv_hint.setAutoLinkMask(Linkify.ALL);
             tv_hint.setMovementMethod(LinkMovementMethod.getInstance());
@@ -187,18 +186,12 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
     public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
         int v1 = 0, v2 = 0;
-        if (rb_sit.isChecked()) {
-            v1 = 1;
-        } else if (rb_uat.isChecked()) {
+        if (rb_uat.isChecked()) {
             v1 = 2;
-        } else if (rb_ysc.isChecked()) {
-            v1 = 3;
-        } else if (rb_sc.isChecked()) {
+        }else if (rb_sc.isChecked()) {
             v1 = 4;
         }
-        if (rb_old.isChecked()) {
-            v2 = 1;
-        } else if (rb_new.isChecked()) {
+        if (rb_new.isChecked()) {
             v2 = 2;
         }
         switch (menuList.get(position).getMenuId()) {

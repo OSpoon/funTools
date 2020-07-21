@@ -53,26 +53,12 @@
                         android:orientation="horizontal">
 
                         <RadioButton
-                            android:id="@+id/rb_sit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:checked="true"
-                            android:text="SIT环境" />
-
-                        <RadioButton
                             android:id="@+id/rb_uat"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:checked="true"
                             android:text="UAT环境" />
-
-                        <RadioButton
-                            android:id="@+id/rb_ysc"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="YSC环境" />
 
                         <RadioButton
                             android:id="@+id/rb_sc"
@@ -98,19 +84,12 @@
                         android:orientation="horizontal">
 
                         <RadioButton
-                            android:id="@+id/rb_old"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:checked="true"
-                            android:text="旧版" />
-
-                        <RadioButton
                             android:id="@+id/rb_new"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="新版" />
+                            android:checked="true"
+                            android:text="3.0" />
 
                     </RadioGroup>
 

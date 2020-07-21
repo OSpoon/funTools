@@ -49,6 +49,7 @@ public class FunTools {
     /* 检测更新地址 */
     public static String base_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
     public static String down_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
+    public static String base_path = "/storage/emulated/0/Android/data/com.sunlife.webapp/files";
     /* 下载文件名 资源文件名 解压文件名 */
     public static String base_name = "gsb_mobile_sit_data";
     /* 下载文件名 APK文件名 解压文件名 */
@@ -68,14 +69,14 @@ public class FunTools {
             DialogHelp.getConfirmDialog(activity, "资源文件清空后需要重新打开光速保进行下载,请确认继续?", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    delAllWww(activity,v1,v2);
+                    delAllWww(activity, v1, v2);
                 }
             }).show();
         } else if (index == 1) {
             DialogHelp.getConfirmDialog(activity, "资源文件初始化后需要重新打开光速保进行下载,请确认继续?", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    delWww(activity,v1,v2);
+                    delWww(activity, v1, v2);
                 }
             }).show();
         }
@@ -85,19 +86,19 @@ public class FunTools {
         DialogHelp.getConfirmDialog(activity, "如本地已下载所选环境的安装包会调用安装界面,安装后会替换手机已有的对应环境的应用,请确认继续?", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                init_www(v1,v2);
+                init_www(activity, v1, v2);
                 boolean next = false;
                 try {
                     if (new File(Environment.getExternalStorageDirectory().getAbsolutePath(), base_app_name + ".apk").exists()) {
                         next = true;
                     } else {
-                        EventBusUtils.post(new EventMessage(100,"安装文件不存在,请登录光速保进行下载!"));
+                        EventBusUtils.post(new EventMessage(100, "安装文件不存在,请登录光速保进行下载!"));
                         Toast.makeText(activity, "安装文件不存在,请登录光速保进行下载!", Toast.LENGTH_SHORT).show();
                         next = false;
                     }
                 } catch (Exception e) {
                     next = false;
-                    EventBusUtils.post(new EventMessage(100,"安装文件不存在,请登录光速保进行下载!"));
+                    EventBusUtils.post(new EventMessage(100, "安装文件不存在,请登录光速保进行下载!"));
                     Toast.makeText(activity, "安装文件不存在,请登录光速保进行下载!" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 if (next) {
@@ -107,8 +108,8 @@ public class FunTools {
         }).show();
     }
 
-    public static void checkVersion(Activity activity,int v1,int v2) {
-        init_www(v1,v2);
+    public static void checkVersion(Activity activity, int v1, int v2) {
+        init_www(activity, v1, v2);
         final ProgressDialog dialog = new ProgressDialog(activity);
         dialog.setMessage("检测中...");
         dialog.show();
@@ -117,19 +118,19 @@ public class FunTools {
                     @Override
                     public void onError(Call call, Exception e, int i) {
                         dialog.dismiss();
-                        EventBusUtils.post(new EventMessage(100,e.getMessage()));
+                        EventBusUtils.post(new EventMessage(100, e.getMessage()));
                     }
 
                     @Override
                     public void onResponse(String json, int i) {
                         dialog.dismiss();
-                        EventBusUtils.post(new EventMessage(100,json));
+                        EventBusUtils.post(new EventMessage(100, json));
                     }
                 });
     }
 
-    public static void getWwwVersion(Activity activity,int v1,int v2) {
-        init_www(v1,v2);
+    public static void getWwwVersion(Activity activity, int v1, int v2) {
+        init_www(activity, v1, v2);
         double currentVersion = 0.9d;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
@@ -141,11 +142,11 @@ public class FunTools {
         } catch (Exception e) {
             currentVersion = 0.9d;
         }
-        EventBusUtils.post(new EventMessage(100,"资源文件版本号 : " + String.valueOf(currentVersion)));
+        EventBusUtils.post(new EventMessage(100, "资源文件版本号 : " + String.valueOf(currentVersion)));
     }
 
     public static void unZipFile(final Activity activity, int v1, int v2) {
-        init_www(v1,v2);
+        init_www(activity, v1, v2);
         DialogHelp.getConfirmDialog(activity, "成功解压后原目录会发生覆盖,请确认", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -157,10 +158,10 @@ public class FunTools {
                     public void run() {
                         if (ZipUtil.unZip(downFilePath, sdPath)) {
                             dialog.dismiss();
-                            EventBusUtils.post(new EventMessage(100,"资源文件解压成功"));
+                            EventBusUtils.post(new EventMessage(100, "资源文件解压成功"));
                         } else {
                             dialog.dismiss();
-                            EventBusUtils.post(new EventMessage(100,"资源文件解压失败"));
+                            EventBusUtils.post(new EventMessage(100, "资源文件解压失败"));
                         }
                     }
                 }).start();
@@ -169,26 +170,26 @@ public class FunTools {
     }
 
     public static void create_nomedia(Activity activity, int v1, int v2) {
-        init_www(v1,v2);
+        init_www(activity, v1, v2);
         boolean isok = FileUtils.createOrExistsFile(basePath + "/.nomedia");
-        EventBusUtils.post(new EventMessage(100,isok ? "创建隐藏完成" : "创建隐藏失败"));
+        EventBusUtils.post(new EventMessage(100, isok ? "创建隐藏完成" : "创建隐藏失败"));
         ToastUtils.showShort(isok ? "创建隐藏完成" : "创建隐藏失败");
     }
 
-    public static void getDownUrl(Activity activity, int v1, int v2){
-        init_www(v1,v2);
-        EventBusUtils.post(new EventMessage(200,"<a href=\"" + down_url + "\">" + down_url + "</a><br>点击跳转浏览器下载"));
+    public static void getDownUrl(Activity activity, int v1, int v2) {
+        init_www(activity, v1, v2);
+        EventBusUtils.post(new EventMessage(201, "<a href=\"" + down_url + "\">" + down_url + "</a>"));
     }
 
     public static void modifyVersion(Activity activity, int v1, int v2) {
-        init_www(v1,v2);
+        init_www(activity, v1, v2);
         boolean isHave = FileUtils.isFileExists(configPath);
         if (isHave) {
             String versionStr = FileUtils.readFile2String(configPath, "UTF-8");
             String str1 = "<productVersion>";
             String str2 = "</productVersion>";
             double versionDouble = Double.valueOf(versionStr.split(str1)[1].split(str2)[0]);
-            onNumberPicker(activity,versionDouble);
+            onNumberPicker(activity, versionDouble);
         } else {
             ToastUtils.showShort("资源文件版本文件不存在");
         }
@@ -206,7 +207,7 @@ public class FunTools {
                         PingNetEntity pingNetEntity = new PingNetEntity(arr[i], 5, 5, new StringBuffer());
                         pingNetEntity = PingNet.ping(pingNetEntity);
                         PingNetEntity finalPingNetEntity = pingNetEntity;
-                        EventBusUtils.post(new EventMessage(100,"\n" + pingNetEntity.getIp() + " time=" + pingNetEntity.getPingTime() + " " + pingNetEntity.isResult()));
+                        EventBusUtils.post(new EventMessage(100, "\n" + pingNetEntity.getIp() + " time=" + pingNetEntity.getPingTime() + " " + pingNetEntity.isResult()));
                     }
                 }).start();
             }
@@ -292,7 +293,7 @@ public class FunTools {
      *                payCode = stx00187oxldjvyo3ofaw60
      *                注：不区分大小写
      */
-    public static void donateAlipay(Activity activity,String payCode) {
+    public static void donateAlipay(Activity activity, String payCode) {
         boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(activity);
         if (hasInstalledAlipayClient) {
             AlipayDonate.startAlipayClient(activity, payCode);
@@ -307,14 +308,14 @@ public class FunTools {
     static int count3 = 0;
 
     public static void getFiles(Activity activity, int v1, int v2) {
-        init_www(v1,v2);
+        init_www(activity, v1, v2);
         buffer = new StringBuffer("");
         count = 0;
         count2 = 0;
         count3 = 0;
         File file = new File(basePath);
         getFileDir(file.listFiles());
-        EventBusUtils.post(new EventMessage(100,"文件夹总数 : " + count2 + "\n"
+        EventBusUtils.post(new EventMessage(100, "文件夹总数 : " + count2 + "\n"
                 + "文件总数 : " + count + "\n"
                 + ".DS_Store文件总数 : " + count3 + "\n"
                 + buffer.toString()));
@@ -347,104 +348,93 @@ public class FunTools {
         }
     }
 
-    private static void delWww(Activity activity,int v1,int v2) {
-        init_www(v1,v2);
+    private static void delWww(Activity activity, int v1, int v2) {
+        init_www(activity, v1, v2);
         boolean next = false;
         try {
             if (new File(configPath).exists()) {
                 next = true;
             } else {
-                EventBusUtils.post(new EventMessage(100,"资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
+                EventBusUtils.post(new EventMessage(100, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
                 Toast.makeText(activity, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!", Toast.LENGTH_SHORT).show();
                 next = false;
             }
         } catch (Exception e) {
             next = false;
-            EventBusUtils.post(new EventMessage(100,"资源文件初始化失败,可能已初始化/丢失,请登录光速保进行下载!"));
+            EventBusUtils.post(new EventMessage(100, "资源文件初始化失败,可能已初始化/丢失,请登录光速保进行下载!"));
             Toast.makeText(activity, "资源文件初始化失败,可能已初始化/丢失,请登录光速保进行下载!" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         if (next) {
             try {
                 boolean isdel = FileUtils.deleteFile(configPath);
                 if (isdel) {
-                    EventBusUtils.post(new EventMessage(100,"资源文件初始化成功"));
+                    EventBusUtils.post(new EventMessage(100, "资源文件初始化成功"));
                     Toast.makeText(activity, "资源文件初始化成功", Toast.LENGTH_SHORT).show();
                 } else {
-                    EventBusUtils.post(new EventMessage(100,"资源文件初始化失败"));
+                    EventBusUtils.post(new EventMessage(100, "资源文件初始化失败"));
                     Toast.makeText(activity, "资源文件初始化失败", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
-                EventBusUtils.post(new EventMessage(100,"资源文件初始化失败"));
+                EventBusUtils.post(new EventMessage(100, "资源文件初始化失败"));
                 Toast.makeText(activity, "资源文件初始化失败" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private static void delAllWww(Activity activity,int v1,int v2) {
-        init_www(v1,v2);
+    private static void delAllWww(Activity activity, int v1, int v2) {
+        init_www(activity, v1, v2);
         boolean next = false;
         try {
             if (new File(basePath).exists()) {
                 next = true;
             } else {
-                EventBusUtils.post(new EventMessage(100,"资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
+                EventBusUtils.post(new EventMessage(100, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
                 Toast.makeText(activity, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!", Toast.LENGTH_SHORT).show();
                 next = false;
             }
         } catch (Exception e) {
             next = false;
-            EventBusUtils.post(new EventMessage(100,"资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
+            EventBusUtils.post(new EventMessage(100, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!"));
             Toast.makeText(activity, "资源文件清空失败,可能已清空/丢失,请登录光速保进行下载!" + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         if (next) {
             try {
                 boolean isdel = FileUtils.deleteFilesInDir(basePath);
                 if (isdel) {
-                    EventBusUtils.post(new EventMessage(100,"资源文件清空成功"));
+                    EventBusUtils.post(new EventMessage(100, "资源文件清空成功"));
                     Toast.makeText(activity, "资源文件清空成功", Toast.LENGTH_SHORT).show();
                 } else {
-                    EventBusUtils.post(new EventMessage(100,"资源文件初始化失败"));
+                    EventBusUtils.post(new EventMessage(100, "资源文件初始化失败"));
                     Toast.makeText(activity, "资源文件清空失败", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
-                EventBusUtils.post(new EventMessage(100,"资源文件初始化失败"));
+                EventBusUtils.post(new EventMessage(100, "资源文件初始化失败"));
                 Toast.makeText(activity, "资源文件清空失败" + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private static void init_www(int v1,int v2) {
-        if (v1 == 1) {
-            base_name = "gsb_mobile_sit_data";
-            base_app_name = "gsb_sit_mobile";
-            base_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
-            down_url = "http://mitst.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
-        } else if (v1 == 2) {
+    private static void init_www(Activity activity, int v1, int v2) {
+        if (v1 == 2) {
             base_name = "gsb_mobile_beta_data";
             base_app_name = "gsb_beta_mobile";
-            base_url = "https://mitphone.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
+            base_url = "https://mitphone.sunlife-everbright.com/api/app/appVersion/findAppVersion";
             down_url = "https://mitphone.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
-        } else if (v1 == 3) {
-            base_name = "gsb_mobile_ysc_data";
-            base_app_name = "gsb_ysc_mobile";
-            base_url = "http://180.213.5.47:8010/com.ifp.ipartner/moUpgrade";
-            down_url = "http://180.213.5.47:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
-        } else if (v1 == 4) {
+            base_path = "/storage/emulated/0/Android/data/com.sunlife.webapp/files";
+        }if (v1 == 4) {
             base_name = "gsb_mobile_sc_data";
             base_app_name = "gsb_sc_mobile";
-            base_url = "http://mit.sunlife-everbright.com:8010/com.ifp.ipartner/moUpgrade";
+            base_url = "https://mit.sunlife-everbright.com/api/app/appVersion/findAppVersion";
             down_url = "http://mit.sunlife-everbright.com:8010/com.ifp.ipartner/proposalShare/index.html#/down/info/2";
+            base_path = "/storage/emulated/0/Android/data/com.sunlife.webappstable/files";
         }
-        if(v2 == 1){
-            basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name;
-            rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/www/index.html";
-            configPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + "/config.xml";
-            sdPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
-        }else if(v2 == 2){
-            basePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name;
-            rootPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name + "/www/index.html";
-            configPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/" + base_name + "/config.xml";
-            sdPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/.gsb_src/";
+        if (v2 == 2) {
+            if (activity != null) {
+                basePath = base_path + "/.gsb_src0/" + base_name;
+                rootPath = base_path + "/.gsb_src0/" + base_name + "/www/index.html";
+                configPath = base_path + "/.gsb_src0/" + base_name + "/config.xml";
+                sdPath = base_path + "/.gsb_src0/";
+            }
         }
         downFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + base_name + ".zip";
     }
