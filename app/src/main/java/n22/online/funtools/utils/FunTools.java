@@ -2,6 +2,7 @@ package n22.online.funtools.utils;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -300,6 +301,10 @@ public class FunTools {
         } else {
             ToastUtils.showShort("安装支付宝后可进行打赏哦~");
         }
+    }
+
+    public static void startMiniProgram(Context context) {
+        WXUtils.startMiniProgram(context);
     }
 
     static StringBuffer buffer;

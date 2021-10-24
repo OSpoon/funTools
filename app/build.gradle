@@ -37,4 +37,5 @@ dependencies {
     implementation 'com.yanzhenjie.permission:support:2.0.1'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'com.github.yuzhiqiang1993:zxing:2.2.5'
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:+'
 }

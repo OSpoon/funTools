@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
         menuList.add(new MenuBean("14", "扫一扫"));
         menuList.add(new MenuBean("15", "应用列表"));
         menuList.add(new MenuBean("16", "打赏"));
+        menuList.add(new MenuBean("17", "小程序"));
     }
 
     private void initView() {
@@ -281,6 +282,9 @@ public class MainActivity extends AppCompatActivity implements BaseQuickAdapter.
                 break;
             case "16":
                 FunTools.donateAlipay(this, "FKX03352RMPYBVZMGAFN5F");
+                break;
+            case "17":
+                FunTools.startMiniProgram(this);
                 break;
         }
     }
